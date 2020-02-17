@@ -127,7 +127,7 @@ instance Monoid (First a) where
   First Nothing  <> x = x
 
 {- Ejercicio
-  Definir un tipo de datos llamado Last que sea somorfo a Maybe y dar una
+  Definir un tipo de datos llamado Last que sea isomorfo a Maybe y dar una
   instancia de monoide que devuelva siempre el último valor
 -}
 
@@ -136,6 +136,7 @@ instance Monoid (First a) where
 ----------------------------------
 {- Dado un monoide podemos
  construir el monoide dual, que será diferente, siempre y cuando
+la operación binaria no sea conmutativa.
 -}
 
 newtype Dual a = Dual a
