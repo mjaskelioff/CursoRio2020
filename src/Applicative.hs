@@ -26,6 +26,9 @@ import Data.Maybe
 --   fmap :: ( a ->   b)
 --         -> f a -> f b
 
+
+
+
 -- La función fmap nos da la forma de tomar una función pura de aridad 1
 -- y "levantarla" al functor.
 
@@ -89,6 +92,7 @@ Analicemos los tipos:
   fmap2 h :: f a -> f b -> f (c -> d)
   fmap2 h fa fb :: f (c -> d)
 
+  ($)        ::   (c -> d) ->  c ->   d
   fmap2 ($) :: f (c -> d) -> f c -> f d
   fmap2 ($) (fmap2 h fa fb) fc :: f d
 
@@ -105,12 +109,12 @@ argumentos) (a -> b),
 
 Entonces podemos representar aridad 0 y aridad n+1.
 
- class Applicative f where
+ class Functor f => Applicative f where
     pure   :: a -> f a                 -- aridad 0
-    (<*>)  :: f (a -> b) -> f a -> f b --aridad (n+1)
+    (<*>)  :: f (a -> b) -> f a -> f b --aridad (1+n)
 
  fmap0 f           = pure f
- fmap1 f fa        = pure f <*> f a
+ fmap1 f fa        = pure f <*> fa
  fmap2 f fa fb     = pure f <*> fa <*> fb
  fmap3 f fa fb fc  = pure f <*> fa <*> fb <*> fc
 
@@ -155,7 +159,7 @@ Por lo tanto, es equivalente, y más idiomático que como lo
 escribimos más arriba, escribir estas definiciones usando el
 operador infijo <$> (fmap):
 
- fmap1 f fa        = f <$> f a
+ fmap1 f fa        = f <$> fa
  fmap2 f fa fb     = f <$> fa <*> fb
  fmap3 f fa fb fc  = f <$> fa <*> fb <*> fc
 
@@ -203,7 +207,10 @@ podemos usar el aplicativo Maybe
 data Maybe a = Nothing | Just a
 
 instance Applicative Maybe where
+    pure :: a -> Maybe a
     pure = Just
+
+    (<*>) :: Maybe (a -> b) -> Maybe a -> Maybe b
     Nothing <*> _       = Nothing
     _       <*> Nothing = Nothing
     Just f  <*> Just x  = Just (f x)
@@ -222,12 +229,20 @@ Just 3
 > (+) <$> Nothing <*> Just 2
 Nothing
 
+
+
+
+
 Todas las computaciones aplicativas son de la forma
 f <$> x <*> y <*> z
 
->(++) <$> Just "hola " <*> "mundo."
+>(++) <$> Just "hola " <*> Just "mundo."
 Just "hola mundo."
 -}
+
+
+
+
 
 dist :: Applicative f => [f a] -> f [a]
 dist []     = pure []
