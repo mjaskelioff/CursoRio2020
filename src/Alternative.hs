@@ -19,6 +19,13 @@ class Applicative f => Alternative f where
   empty :: f a
   (<|>) :: f a -> f a -> f a
 
+
+
+
+
+
+
+
 No hay consenso sobre qué leyes deben satisfacer sus instancias.
 Sí hay consenso que estas operaciones deben ser un monoide.
 
@@ -26,12 +33,29 @@ empty <|> x = x
 x <|> empty = x
 (x <|> y) <|> z = x <|> (y <|> z)
 
+
+
+
+
+
+
+
+
+
+
 Pero ¿cómo deben interactuar con las operaciones de Applicative?
 Depende de lo que uno quiera modelar. Para modelar no-determinismo,
 las ecuaciones son (Rivas, Jaskelioff, Schrijvers (2018)):
 
  empty <*> x = empty
  (f <|> g) <*> x = (f <*> x) <|> (g <*> x)
+
+
+
+
+
+
+
 
 
  Ejemplo de instancia
@@ -43,10 +67,24 @@ instance Alternative Maybe where
 
 -}
 
+
+
+
+
+
 -- -- Aplicación: Parsers
 class Alternative f => AppParser f where
   sat :: (Char -> Bool) -> f Char
   eof :: f ()
+
+
+
+
+
+
+
+
+
 
   {-
   La clase Alternative ya trae definido las siguientes funciones
@@ -54,14 +92,14 @@ class Alternative f => AppParser f where
   no solamente para Parsers)
 
   -- una o mas veces
-  some :: Applicative f => f a -> f [a]
+  some :: Alternative f => f a -> f [a]
   some v = some_v
       where
         many_v = some_v <|> pure []
-        some_v = liftA2 (:) v many_v
+        some_v = (:) <$> v <*> many_v
 
   -- cero o mas veces
-  many :: Applicative f => f a -> f [a]
+  many :: Alternative f => f a -> f [a]
   many v = many_v
       where
         many_v = some_v <|> pure []
@@ -118,6 +156,15 @@ instance Alternative Parser where
   P a <|> P b = P $ \s -> a s <|> b s
 
 
+
+
+
+
+
+
+
+ -- newtype Parser a = P {parse :: String -> Maybe (a,String)}
+
 instance AppParser Parser where
   sat :: (Char -> Bool) -> Parser Char
   sat p = P  $ \s -> case s of
@@ -126,6 +173,10 @@ instance AppParser Parser where
                     ""                 -> Nothing
   eof :: Parser ()
   eof = P $ \s -> if null s then Just ((),"") else Nothing
+
+
+
+
 
 
 -----------------
